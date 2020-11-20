@@ -1,1 +1,2 @@
-# ChessAIBradley
+# ChessAIBradley, 
+# Areeb, Shibi, and Arthur 
