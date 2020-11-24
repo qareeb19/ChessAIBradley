@@ -90,19 +90,19 @@ class Player:
             for move in board.legal_moves:
                 experimentBoard = board.copy()
                 experimentBoard.push(move)
-                value = self.minimax(experimentBoard, depth, False)
+                move, value = self.minimax(experimentBoard, depth, False)
                 bestValue = max(bestValue, value)
-            return bestValue
+            return move, bestValue
         else:
             bestValue = float("inf")
             for move in board.legal_moves:
                 experimentBoard = board.copy()
                 experimentBoard.push(move)
-                value = self.minimax(experimentBoard, depth - 1, True)
+                move, value = self.minimax(experimentBoard, depth - 1, True)
                 bestValue = min(bestValue, value)
-            return bestValue
+            return move, bestValue
 
-        return 0
+        return move
 
     def evaluation(self, board):
         i = 0
@@ -142,19 +142,21 @@ class Player:
 
     def move(self, board, time):
         possible_moves = list(board.legal_moves)
-
         moves = self.minimax(possible_moves, 1, True)
-
+        
         if(len(possible_moves) == 0):
             sys.exit()
         bestMove = None
         bestValue = -9999
-        for x in possible_moves:
-            moves = chess.Move.from_uci(str(x))
+        for moves in possible_moves:
+            moves = self.minimax(possible_moves, 1, True)
+            moves = chess.Move.from_uci(str(moves))
+           
+
             board.push(moves)
-            boardValue = -self.evaluation(board)
+            boardValue = -self.evaluation(board) #- self.minimax(board, 1, True)
             board.pop()
             if(boardValue > bestValue):
                 bestValue = boardValue
                 bestMove = moves
-        return moves
+        return bestMove

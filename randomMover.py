@@ -7,4 +7,5 @@ class Player:
         pass
 
     def move(self, board, time):
+        
         return random.choice(list(board.legal_moves))

@@ -75,48 +75,84 @@ class Player:
         piece_values = {'P': 10, 'N': 30, 'B': 30, 'R': 50, 'Q': 90, 'K': 100,
                         'p': -10, 'n': -30, 'b': -30, 'r': -50, 'q': -90, 'k': -100}
 
-    def minimax(self, board, depth, maximize):
-     #       if board.is_checkmate():
-     #           return -40 if maximize else 40
-     #       elif board.is_game_over():
-     #           return 0
-        board = chess.Board()
+    def minimaxRoot(self, depth, board, isMaximizing):
+        possibleMoves = board.legal_moves
+        bestMove = -9999
+        secondBest = -9999
+        thirdBest = -9999
+        bestMoveFinal = None
+        for x in possibleMoves:
+            move = chess.Move.from_uci(str(x))
+            board.push(move)
+            value = max(bestMove, self.minimax(
+                depth - 1, board, not isMaximizing))
+            board.pop()
+            if(value > bestMove):
 
-        if depth == 0:
-            return self.evaluation(board)
+                thirdBest = secondBest
+                secondBest = bestMove
+                bestMove = value
+                bestMoveFinal = move
+        return bestMoveFinal
 
-        if maximize:
-            bestValue = float("-inf")
-            for move in board.legal_moves:
-                experimentBoard = board.copy()
-                experimentBoard.push(move)
-                value = self.minimax(experimentBoard, depth, False)
-                bestValue = max(bestValue, value)
-            return bestValue
+    def minimax(self, depth, board, is_maximizing):
+        if(depth == 0):
+            return -self.evaluation(board)
+        possibleMoves = board.legal_moves
+        if(is_maximizing):
+            bestMove = -9999
+            for x in possibleMoves:
+                move = chess.Move.from_uci(str(x))
+                board.push(move)
+                bestMove = max(bestMove, self.minimax(
+                    depth - 1, board, not is_maximizing))
+                board.pop()
+            return bestMove
         else:
-            bestValue = float("inf")
-            for move in board.legal_moves:
-                experimentBoard = board.copy()
-                experimentBoard.push(move)
-                value = self.minimax(experimentBoard, depth - 1, True)
-                bestValue = min(bestValue, value)
-            return bestValue
+            bestMove = 9999
+            for x in possibleMoves:
+                move = chess.Move.from_uci(str(x))
+                board.push(move)
+                bestMove = min(bestMove, self.minimax(
+                    depth - 1, board, not is_maximizing))
+                board.pop()
+            return bestMove
 
-        return 0
+
+# def calculateMove(board):
+#    possible_moves = board.legal_moves
+#    if(len(possible_moves) == 0):
+#        print("No more possible moves...Game Over")
+#        sys.exit()
+#    bestMove = None
+#    bestValue = -9999
+#    n = 0
+#    for x in possible_moves:
+#        move = chess.Move.from_uci(str(x))
+#        board.push(move)
+#        boardValue = -evaluation(board)
+#        board.pop()
+#        if(boardValue > bestValue):
+#            bestValue = boardValue
+#            bestMove = move
+#
+#    return bestMove
+
 
     def evaluation(self, board):
         i = 0
         evaluation = 0
-
+        x = True
+        try:
+            x = bool(board.piece_at(i).color)
+        except AttributeError as e:
+            x = x
         while i < 63:
             i += 1
-            if True:
-                evaluation = evaluation + \
-                    self.getPieceValue(str(board.piece_at(i)))
-            else:
-                evaluation = 0
-
-            return evaluation
+            evaluation = evaluation + \
+                (self.getPieceValue(str(board.piece_at(i)))
+                 if x else -self.getPieceValue(str(board.piece_at(i))))
+        return evaluation
 
     def getPieceValue(self, piece):
         if(piece == None):
@@ -134,15 +170,16 @@ class Player:
             value = 90
         if piece == 'K' or piece == 'k':
             value = 900
-
+    #value = value if (board.piece_at(place)).color else -value
         return value
 
-#    def move(self, board, time):
-#        return minimax(self, board, 1, 3)
-
     def move(self, board, time):
-        possible_moves = board.legal_moves
+        board = chess.Board()
+        n = 0
 
-        moves = self.minimax(possible_moves, 1, True)
+        while n < 100:
+            move = self.minimaxRoot(1, board, True)
+            move = chess.Move.from_uci(str(move))
+            board.push(move)
 
-        return moves
+            n += 1
