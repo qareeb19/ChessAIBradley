@@ -5,8 +5,8 @@ import sys
 import numpy as np
 
 
-piece_values = {'P': 10, 'N': 30, 'B': 30, 'R': 50, 'Q': 90, 'K': 100,
-                'p': -10, 'n': -30, 'b': -30, 'r': -50, 'q': -90, 'k': -100}
+piece_values = {'P': 10, 'N': 30, 'B': 30, 'R': 50, 'Q': 90, 'K': 900,
+                'p': -10, 'n': -30, 'b': -30, 'r': -50, 'q': -90, 'k': -900}
 
 position_values = {
     'P': np.array([[0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
@@ -101,18 +101,31 @@ class Player:
                         positionArray[rank, file]
 
             return positionTotalEval
+    '''def evaluation(self, board, piece_values = piece_values ):
+        i = 0
+        evaluation = 0
+
+        while i < 63:
+            i += 1
+            if True:
+                evaluation = evaluation + piece_values[i]
+            else:
+                evaluation = 0
+
+        return evaluation'''
 
     def minimax(self, position, depth, alpha, beta, maximizingPlayer):
         if depth == 0 or position.is_game_over():
-            return self.positionEvaluation(position, piece_values, position_values)
+            return self.positionEvaluation(position)
 
         if maximizingPlayer:
             maxEval = -np.inf
-            for child in [str(i).replace("Move.from_uci(\'", '').replace('\')', '') for i in list(position.legal_moves)]:
-                position.push(chess.Move.from_uci(child))
+            for child in list(position.legal_moves):
+                position.push(child)
                 eval_position = self.minimax(
                     position, depth-1, alpha, beta, False)[0]
                 position.pop()
+                
                 maxEval = np.maximum(maxEval, eval_position)
                 alpha = np.maximum(alpha, eval_position)
                 if beta <= alpha:
@@ -122,11 +135,12 @@ class Player:
         else:
             minEval = np.inf
             minMove = np.inf
-            for child in [str(i).replace("Move.from_uci(\'", '').replace('\')', '') for i in list(position.legal_moves)]:
-                position.push(chess.Move.from_uci(child))
+            for child in list(position.legal_moves):
+                position.push(child)
                 eval_position = self.minimax(
                     position, depth-1, alpha, beta, True)
                 position.pop()
+               
                 minEval = np.minimum(minEval, eval_position)
                 if minEval < minMove:
                     minMove = minEval
@@ -135,53 +149,54 @@ class Player:
                 beta = np.minimum(beta, eval_position)
                 if beta <= alpha:
                     break
-
+            str(bestMin).replace('', "Move.from_uci(\'").replace('', '\')')
             return minEval, bestMin
-#    def minimax(self, board, depth, maximize):
-#        board = chess.Board()
-#        if board.is_checkmate():
-#            return -40 if maximize else 40
-#        elif board.is_game_over():
-#            return 0
+    '''def minimax(self, board, depth, maximize):
+        board = chess.Board()
+        if board.is_checkmate():
+            return -40 if maximize else 40
+        elif board.is_game_over():
+            return 1
 
-#        if depth == 0:
-#            return self.positionEvaluation(board)
+        if depth == 0:
+            return self.positionEvaluation(board)
 
-#        if maximize:
-#            bestValue = float("-inf")
-#            for move in board.legal_moves:
-#                experimentBoard = board.copy()
-#                experimentBoard.push(move)
-#                value = self.minimax(experimentBoard, depth, False)
-#                bestValue = max(bestValue, value)
-#            return bestValue
-#        else:
-#            bestValue = float("inf")
-#            for move in board.legal_moves:
-#                experimentBoard = board.copy()
-#                experimentBoard.push(move)
-#                value = self.minimax(experimentBoard, depth - 1, True)
-#                bestValue = min(bestValue, value)
-#            return bestValue
-#        return 0
+        if maximize:
+            bestValue = float("-inf")
+            for move in board.legal_moves:
+                experimentBoard = board.copy()
+                experimentBoard.push(move)
+                value = self.minimax(experimentBoard, depth, False)
+                bestValue = max(bestValue, value)
+            return bestValue
+        else:
+            bestValue = float("inf")
+            for move in board.legal_moves:
+                experimentBoard = board.copy()
+                experimentBoard.push(move)
+                print(move)
+                value = self.minimax(experimentBoard, depth - 1, True)
+
+                bestValue = min(bestValue, value)
+
+            return bestValue'''
 
     def move(self, board, time):
         possible_moves = list(board.legal_moves)
-
-        moves = self.minimax(board, 0, 1, 2,  True)
-        print(moves)
-
-        if(len(list(possible_moves)) == 0):
+        moves = self.minimax(board, 1, -float("inf"), float("inf"), False)
+#        position = self.positionEvaluation(board)
+#        print(position)
+        y = int(moves[0])
+        if(len(possible_moves) == 0):
             sys.exit()
-#        bestMove = None
-#        bestValue = -9999
-#        for x in possible_moves:
-#            move = chess.Move.from_uci(str(x))
-#            board.push(move)
-#            boardValue = -self.positionEvaluation(board)
-#            board.pop()
-#            if(boardValue > bestValue):
-#                bestValue = boardValue
-#                bestMove = move
+        bestMove = None
+        bestValue = -9999999
+        for x in possible_moves:
+            board.push(x)
+            boardValue = self.positionEvaluation(board) 
+            board.pop()
+            if(boardValue  > bestValue):
+                bestValue = boardValue
+                bestMove = x
 
-        return moves
+        return bestMove
