@@ -9,6 +9,10 @@ piece_values = {'P': 10, 'N': 30, 'B': 30, 'R': 50, 'Q': 90, 'K': 900,
                 'p': -10, 'n': -30, 'b': -30, 'r': -50, 'q': -90, 'k': -900}
 
 position_values = {
+    #principles to implement -
+    #some pieces, specifically kings and pawns are scored differently in the opening, middle and endgame
+    #having both bishops gives a bonus, castling gives a permanent advantage for as long as you hold that, isolated pawns recieve a penalty, having 8 pawns is a penalty, 
+    # #having double pawns is a penalty, having lonely pawns is a penalty
     'P': np.array([[0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  0.0],
                    [5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0,  5.0],
                    [1.0,  1.0,  2.0,  3.0,  3.0,  2.0,  1.0,  1.0],
@@ -77,6 +81,7 @@ class Player:
 
             for piece in pieces:
                 total_eval += piece_values[str(piece)]
+                
 
             return total_eval
 
@@ -98,7 +103,7 @@ class Player:
 
                 else:
                     positionTotalEval += piece_values[piece_type] - \
-                        positionArray[rank, file]
+                        positionArray[rank, file] 
 
             return positionTotalEval
     '''def evaluation(self, board, piece_values = piece_values ):
@@ -122,8 +127,7 @@ class Player:
             maxEval = -np.inf
             for child in list(position.legal_moves):
                 position.push(child)
-                eval_position = self.minimax(
-                    position, depth-1, alpha, beta, False)[0]
+                eval_position = self.minimax(position, depth-1, alpha, beta, False)[0]
                 position.pop()
                 
                 maxEval = np.maximum(maxEval, eval_position)
@@ -137,8 +141,7 @@ class Player:
             minMove = np.inf
             for child in list(position.legal_moves):
                 position.push(child)
-                eval_position = self.minimax(
-                    position, depth-1, alpha, beta, True)
+                eval_position = self.minimax(position, depth-1, alpha, beta, True)
                 position.pop()
                
                 minEval = np.minimum(minEval, eval_position)
@@ -186,7 +189,7 @@ class Player:
         moves = self.minimax(board, 1, -float("inf"), float("inf"), False)
 #        position = self.positionEvaluation(board)
 #        print(position)
-        y = int(moves[0])
+#        y = int(moves[0])
         if(len(possible_moves) == 0):
             sys.exit()
         bestMove = None
@@ -199,4 +202,4 @@ class Player:
                 bestValue = boardValue
                 bestMove = x
 
-        return bestMove
+        return moves[1]
