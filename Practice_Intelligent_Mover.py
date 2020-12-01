@@ -199,7 +199,7 @@ class Player:
             boardValue = self.positionEvaluation(board) 
             board.pop()
             if(boardValue  > bestValue):
-                bestValue = boardValue
+                bestValue = moves[1]
                 bestMove = x
 
-        return moves[1]
+        return bestMove
